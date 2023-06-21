@@ -1,4 +1,4 @@
-# pydantic_dictionary
+# pydantic_dict
 
 A `pydantic` model subclass that implements Python's dictionary interface.
 
