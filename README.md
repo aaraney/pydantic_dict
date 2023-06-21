@@ -9,7 +9,7 @@ from pydantic_dict import BaseModelDict
 
 class User(BaseModelDict):
     id: int
-    name: str = 'Jane Doe'
+    name: str = "Jane Doe"
 
 user = User(id=42)
 
@@ -23,7 +23,14 @@ assert user.get("last_name", None) is None
 
 user.update({"email": "jane.doe@email.com"})
 print(user.json())
+# >>> {"id": 42, "name": "Jane Doe", "email": "jane.doe@email.com"}
 
+user.clear()  # field's are NOT removed. only non-field's are removed
+print(user.json())
+# >>> {"id": 42, "name": "Jane Doe"}
+
+user.setdefault("last_active", "2023-01-01T19:56:10Z")
+del user["last_active"]
 ```
 
 ## Install
