@@ -1,0 +1,42 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools", "setuptools-scm"]
+
+[project]
+authors = [
+  {name = "Austin Raney", email = "aaraney@protonmail.com"},
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: Unix",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Utilities",
+]
+dependencies = [
+  "pydantic",
+  "typing_extensions",
+]
+description = "A pydantic model subclass that implements Python's dictionary interface."
+dynamic = ["version"]
+keywords = ["pydantic", "serialization", "deserialization", "json"]
+license = {text = "MIT License"}
+name = "pydantic_dict"
+readme = "README.md"
+requires-python = ">=3.7"
+
+[project.optional-dependencies]
+dev = ["black"]
+test = ["pytest>=7.0.0"]
+
+[tool.setuptools]
+packages = ["pydantic_dict"]
+
+[tool.setuptools.dynamic]
+version = {attr = "pydantic_dict.__version__"}
