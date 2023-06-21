@@ -25,7 +25,7 @@ user.update({"email": "jane.doe@email.com"})
 print(user.json())
 # >>> {"id": 42, "name": "Jane Doe", "email": "jane.doe@email.com"}
 
-user.clear()  # field's are NOT removed. only non-field's are removed
+user.clear()  # fields are NOT removed. only non-fields are removed
 print(user.json())
 # >>> {"id": 42, "name": "Jane Doe"}
 
