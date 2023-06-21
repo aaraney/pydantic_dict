@@ -5,7 +5,7 @@ from typing import Any, Type
 __SENTINEL = object()
 
 
-@lru_cache
+@lru_cache(maxsize=None)
 def getclsattr(cls: Type[Any], name: str, __default: Any = __SENTINEL) -> Any:
     super_classes = cls.__mro__
     needles = name.split(".")
