@@ -1,12 +1,14 @@
-from pydantic import BaseModel, Extra, ValidationError
+from pydantic import BaseModel, Extra, PrivateAttr, ValidationError, Field
 from typing import (
     Any,
     ClassVar,
     Dict,
+    FrozenSet,
     ItemsView,
     Iterable,
     Iterator,
     KeysView,
+    Set,
     Tuple,
     TypeVar,
     ValuesView,
@@ -95,6 +97,11 @@ class BaseModelDict(BaseModel):
     """
 
     __SENTINEL: ClassVar[object] = object()
+    _default_unset: ClassVar[FrozenSet[str]]
+    """set of fields on a _subclass_ with default value, `Unset`"""
+
+    _unset: Set[str] = PrivateAttr(default_factory=set)
+    """set of fields on an _instance_ that _are_, currently, `Unset`"""
 
     class Config(BaseModel.Config):
         extra = Extra.allow
