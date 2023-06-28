@@ -128,6 +128,9 @@ class BaseModelDict(BaseModel):
         return key in self._unset
 
     def __contains__(self, key: str) -> bool:
+        if self._field_unset(key):
+            return False
+
         return key in self.__dict__
 
     @_raise_type_error_if_immutable
@@ -138,24 +141,38 @@ class BaseModelDict(BaseModel):
         del self.__dict__[key]
 
     def __getitem__(self, key: str) -> Any:
+        if self._field_unset(key):
+            raise KeyError(key)
         return self.__dict__[key]
 
     def __len__(self) -> int:
-        return len(self.__dict__)
+        return len(self.__dict__) - len(self._unset)
 
-    @_raise_type_error_if_immutable
-    def __setitem__(self, key: str, value: Any):
-        if key in self.__fields__:
-            # validation is performed if `Config.validate_assignment` flag on
-            setattr(self, key, value)
+    def __setattr__(self, name: str, value: Any):
+        # remove field if now set
+        if name in self._unset and value != _unset_sentinel:
+            # pop to preserve dictionary ordering. dictionary insertion order if
+            # lifo in python >= 3.7
+            old_value = self.__dict__.pop(name)
+            try:
+                # setattr will add field back to dictionary
+                super().__setattr__(name, value)
+            except Exception as e:
+                # if set attr fails for whatever reason, ordering will not be
+                # maintained, but the dictionary will be preserved.
+                self.__dict__[name] = old_value
+                raise e
+            self._unset.remove(name)
             return
+        super().__setattr__(name, value)
 
-        _raise_value_error_if_extra_fields_not_allowed(self)
-
-        self.__dict__[key] = value
+    def __setitem__(self, key: str, value: Any):
+        # validation is performed if `Config.validate_assignment` flag on
+        setattr(self, key, value)
 
     def __iter__(self) -> Iterator[str]:
-        return self.__dict__.__iter__()
+        # filter `Unset` fields
+        return set(self.__dict__).difference(self._unset).__iter__()
 
     @_raise_type_error_if_immutable
     def clear(self):
@@ -174,10 +191,10 @@ class BaseModelDict(BaseModel):
         return self[key]
 
     def items(self) -> ItemsView[str, Any]:
-        return self.__dict__.items()
+        return {k: v for k, v in self.__dict__.items() if k not in self._unset}.items()
 
     def keys(self) -> KeysView[str]:
-        return self.__dict__.keys()
+        return {k: None for k in self.__dict__.keys() if k not in self._unset}.keys()
 
     @_raise_type_error_if_immutable
     def pop(self, key: str, default: Any = __SENTINEL) -> Any:
@@ -253,6 +270,7 @@ class BaseModelDict(BaseModel):
         import copy
 
         original_state = copy.deepcopy(self.__dict__)
+        original_unset = self._unset.copy()
 
         try:
             for key, value in values.items():
@@ -261,6 +279,7 @@ class BaseModelDict(BaseModel):
             # `pydantic.BaseModel.__setattr__` overload embeds __dict__ within __dict__ if set
             # through it's `__setattr__`. use object's __setattr__ to get around this.
             object.__setattr__(self, "__dict__", original_state)
+            object.__setattr__(self, "_unset", original_unset)
             raise e
 
     @_raise_type_error_if_immutable
@@ -276,7 +295,10 @@ class BaseModelDict(BaseModel):
         ----------
         values : Dict[str, Any]
         """
+        for field in values:
+            if field in self._unset:
+                self._unset.remove(field)
         self.__dict__.update(values)
 
     def values(self) -> ValuesView[Any]:
-        return self.__dict__.values()
+        return {k: v for k, v in self.__dict__.items() if k not in self._unset}.values()
