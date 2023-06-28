@@ -33,6 +33,41 @@ user.setdefault("last_active", "2023-01-01T19:56:10Z")
 del user["last_active"]
 ```
 
+**`Unset` marker type**
+
+The `Unset` marker type provides a way to "mark" that an optional model field
+is by default not set and is not required to construct the model. This enables
+more semantic usage of built-in dict methods like `get()` and `setdefault()`
+that can return or set a default value. Likewise, fields that are `Unset` are
+not considered to be members of a `BaseModelDict` dictionary (e.g.
+`"unset_field" not in model_dict`) and are not included in `__iter__()`,
+`keys()`, `values()`, or `len(model_dict)`. This feature is especially useful
+when refactoring existing code to use pydantic.
+
+**Example:**
+
+
+```python
+from pydantic_dict import BaseModelDict, Unset
+from typing import Optional
+
+class User(BaseModelDict):
+    id: int
+    name: str = "Jane Doe"
+    email: Optional[str] = Unset
+
+user = User(id=42)
+
+assert "email" not in user
+user["email"] # raises KeyError
+
+assert len(user) == 2
+assert set(user.keys()) == {"id", "name"}
+
+user.setdefault("email", f"{user.id}@service.com") # returns `42@service.com`
+assert "email" in user
+```
+
 ## Install
 
 ```shell
