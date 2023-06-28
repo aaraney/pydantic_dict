@@ -19,11 +19,18 @@ from typing import Callable, Any, TypeVar
 from typing_extensions import ParamSpec
 
 from ._utils import getclsattr
+from ._sentinel import Sentinel
 from .exceptions import UnreachableException
 
 M = TypeVar("M", bound="BaseModelDict")
 P = ParamSpec("P")
 R = TypeVar("R", covariant=True)
+
+_unset_sentinel = Sentinel()
+
+
+def _unset_sentinel_singleton():
+    return _unset_sentinel
 
 
 def _raise_type_error_if_immutable(fn: Callable[P, R]) -> Callable[P, R]:
@@ -51,6 +58,9 @@ def _raise_value_error_if_extra_fields_not_allowed(m: BaseModel):
         raise UnreachableException()
     if extra != Extra.allow:
         raise ValueError(f'"{type(m).__name__}" does not allow extra fields.')
+
+
+Unset: None = Field(default_factory=_unset_sentinel_singleton)
 
 
 class BaseModelDict(BaseModel):
