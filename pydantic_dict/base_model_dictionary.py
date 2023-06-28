@@ -106,6 +106,27 @@ class BaseModelDict(BaseModel):
     class Config(BaseModel.Config):
         extra = Extra.allow
 
+    def __init_subclass__(cls) -> None:
+        cls._default_unset = frozenset(
+            name
+            for name, field in cls.__fields__.items()
+            if field.default_factory == _unset_sentinel_singleton
+        )
+        return super().__init_subclass__()
+
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+
+        # filter fields that were set during __init__ by `Unset` by default.
+        self._unset = set(
+            field
+            for field in self._default_unset
+            if self.__dict__[field] == _unset_sentinel
+        )
+
+    def _field_unset(self, key: str) -> bool:
+        return key in self._unset
+
     def __contains__(self, key: str) -> bool:
         return key in self.__dict__
 
