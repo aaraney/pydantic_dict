@@ -20,7 +20,7 @@ classifiers = [
   "Topic :: Utilities",
 ]
 dependencies = [
-  "pydantic",
+  "pydantic<2",
   "typing_extensions",
 ]
 description = "A pydantic model subclass that implements Python's dictionary interface."
