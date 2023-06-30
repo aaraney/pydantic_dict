@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.3] - 2023-06-30
 
-## Changes
+### Changes
 
 - Pin `pydantic<2`. [Pydantic 2](https://pypi.org/project/pydantic/2.0/) was
   released today. This major version release introduces some breaking changes
